@@ -1,3 +1,5 @@
-- fix srcs/utils.c/ft_tcsetattr() function
+- print status messages to typescript file as well
+- easy options: -a, -q
+- medium option: -F pipe
+- hard options: -r, -p, -d
 - fix norm
-- add options

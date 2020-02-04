@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:11:02 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/04 06:26:15 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/04 19:35:32 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,13 +44,13 @@ inline int	ft_tcgetattr(int fd, struct termios *t)
 
 inline int	ft_tcsetattr(int fd, int opts, const struct termios *t)
 {
-	int	req;
+	unsigned long	req;
 
-	if (opts & TCSANOW)
+	if (opts == TCSANOW)
 		req = TIOCSETA;
-	else if (opts & TCSADRAIN)
+	else if (opts == TCSADRAIN)
 		req = TIOCSETAW;
-	else if (opts & TCSAFLUSH)
+	else if (opts == TCSAFLUSH)
 		req = TIOCSETAF;
 	else
 		return (-1);

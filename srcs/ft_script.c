@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/04 06:24:30 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/04 19:26:44 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,22 @@ static void	script(t_pty *p, const char *tsfile)
 	(void)close(tsfd);
 }
 
+const char	*shell_path(void)
+{
+	extern char	**environ;
+	const char	*tmp;
+	char		**bw;
+
+	bw = environ;
+	while (bw && *bw)
+	{
+		if (ft_strstart(*bw, "SHELL") && (tmp = ft_strchr(*bw, '=')))
+			return (tmp + 1);
+		bw++;
+	}
+	return ("/bin/bash");
+}
+
 int			main(int ac, const char **av)
 {
 	const char	*cmdpath;
@@ -61,7 +77,7 @@ int			main(int ac, const char **av)
 		ft_sfatal("Could not create new pseudo-terminal", 1);
 	if (!pty_slave_open(&pty))
 		ft_sfatal("Could not open slave portion of created pty", 1);
-	cmdpath = (ac > 2) ? av[2] : "/bin/bash";
+	cmdpath = (ac > 2) ? av[2] : shell_path();
 	file = (ac > 1) ? av[1] : "typescript";
 	(void)configure_inherited_tty(NO);
 	if ((pid = fork()) == -1)
