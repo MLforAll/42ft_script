@@ -1,0 +1,3 @@
+- fix srcs/utils.c/ft_tcsetattr() function
+- fix norm
+- add options
