@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/04 19:26:44 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/05 22:03:37 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,7 @@ const char	*shell_path(void)
 			return (tmp + 1);
 		bw++;
 	}
-	return ("/bin/bash");
+	return ("/bin/sh");
 }
 
 int			main(int ac, const char **av)
