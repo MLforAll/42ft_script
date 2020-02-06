@@ -6,7 +6,7 @@
 #    By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/13 20:41:05 by kdumarai          #+#    #+#              #
-#    Updated: 2020/02/04 06:05:32 by kdumarai         ###   ########.fr        #
+#    Updated: 2020/02/06 00:09:31 by kdumarai         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,6 +27,8 @@ SRCDIR = srcs
 SRCFILES = ft_script.c \
 			pty.c \
 			term.c \
+			cmdpath.c \
+			libc_utils.c \
 			utils.c
 SRCS = $(addprefix $(SRCDIR)/, $(SRCFILES))
 NSRC = $(shell echo "$(SRCFILES)" | awk '{print NF}')

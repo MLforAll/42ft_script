@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/05 22:03:37 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/06 02:09:14 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,45 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/select.h>
+#include <sys/time.h>
+#include "time.h"
 
 #include "ft_script.h"
 
-static void	script(t_pty *p, const char *tsfile)
+static uint8_t	send_stdin_to_fdm(t_pty *p)
+{
+	char	buff[16];
+	ssize_t	rb;
+
+	if ((rb = read(STDIN_FILENO, buff, sizeof(buff))) < 1)
+		return (FALSE);
+	(void)write(p->fdm, buff, rb);
+	return (TRUE);
+}
+
+static void		announce_script(const char *tsfile, int tsfd, uint8_t begin)
+{
+	struct timeval	tp;
+	const char		*ct;
+	int				rc;
+
+	rc = gettimeofday(&tp, NULL);
+	ct = (rc == 0) ? ctime(&tp.tv_sec) : "NULL";
+	if (begin)
+	{
+		ft_putstr("Script started, output file is ");
+		ft_putendl(tsfile);
+		ft_putstr_fd("Script started on ", tsfd);
+		ft_putstr_fd(ct, tsfd);
+		return ;
+	}
+	ft_putstr("\nScript done, output file is ");
+	ft_putendl(tsfile);
+	ft_putstr_fd("\nScript done on ", tsfd);
+	ft_putstr_fd(ct, tsfd);
+}
+
+static void		script(t_pty *p, const char *tsfile)
 {
 	int		tsfd;
 	char	tsb[512];
@@ -26,76 +61,56 @@ static void	script(t_pty *p, const char *tsfile)
 
 	if ((tsfd = open(tsfile, O_WRONLY | O_CREAT, 0644)) < 0)
 		return ;
+	announce_script(tsfile, tsfd, YES);
 	while (TRUE)
 	{
 		FD_ZERO(&ss);
 		FD_SET(p->fdm, &ss);
 		FD_SET(STDIN_FILENO, &ss);
-		if (select(p->fdm + 1, &ss, NULL, NULL, NULL) < 1)
+		if (select(p->fdm + 1, &ss, NULL, NULL, NULL) < 1 \
+			|| (FD_ISSET(STDIN_FILENO, &ss) && !send_stdin_to_fdm(p)))
 			break ;
-		if (FD_ISSET(STDIN_FILENO, &ss))
-		{
-			if ((rb = read(STDIN_FILENO, tsb, sizeof(tsb))) < 1)
-				break ;
-			(void)write(p->fdm, tsb, rb);
-		}
-		else if (FD_ISSET(p->fdm, &ss))
+		if (FD_ISSET(p->fdm, &ss))
 		{
 			if ((rb = read(p->fdm, tsb, sizeof(tsb))) < 1)
 				break ;
-			(void)write(STDOUT_FILENO, tsb, rb);
-			(void)write(tsfd, tsb, rb);
+			ft_mwrites(STDOUT_FILENO, tsfd, tsb, rb);
 		}
 	}
+	announce_script(tsfile, tsfd, NO);
 	(void)close(tsfd);
 }
 
-const char	*shell_path(void)
+static void		fork_process(t_pty *pty, const char *cmdpath, const char *file)
 {
-	extern char	**environ;
-	const char	*tmp;
-	char		**bw;
+	pid_t	pid;
 
-	bw = environ;
-	while (bw && *bw)
+	if ((pid = fork()) == -1)
+		ft_sfatal("fork() failed", 1);
+	if (pid == 0)
 	{
-		if (ft_strstart(*bw, "SHELL") && (tmp = ft_strchr(*bw, '=')))
-			return (tmp + 1);
-		bw++;
+		pty_child_attach(pty);
+		(void)execl(cmdpath, cmdpath);
+		_exit(127);
 	}
-	return ("/bin/sh");
+	(void)close(pty->fds);
+	script(pty, file);
+	(void)waitpid(pid, NULL, 0);
+	(void)close(pty->fdm);
 }
 
-int			main(int ac, const char **av)
+int				main(int ac, const char **av)
 {
-	const char	*cmdpath;
-	const char	*file;
 	t_pty		pty;
-	pid_t		pid;
 
 	if (!pty_new(&pty))
 		ft_sfatal("Could not create new pseudo-terminal", 1);
 	if (!pty_slave_open(&pty))
 		ft_sfatal("Could not open slave portion of created pty", 1);
-	cmdpath = (ac > 2) ? av[2] : shell_path();
-	file = (ac > 1) ? av[1] : "typescript";
 	(void)configure_inherited_tty(NO);
-	if ((pid = fork()) == -1)
-		ft_sfatal("fork() failed", 1);
-	if (pid == 0)
-	{
-		pty_child_attach(&pty);
-		(void)execl(cmdpath, cmdpath, NULL);
-		_exit(127);
-	}
-	(void)close(pty.fds);
-	ft_putstr("Script started, output file is ");
-	ft_putendl(file);
-	script(&pty, file);
-	(void)waitpid(pid, NULL, 0);
-	(void)close(pty.fdm);
-	ft_putstr("\nScript done, output file is ");
-	ft_putendl(file);
+	fork_process(&pty, \
+		cmd_path((ac > 2) ? av[2] : NULL), \
+		(ac > 1) ? av[1] : "typescript");
 	(void)configure_inherited_tty(YES);
 	return (EXIT_SUCCESS);
 }
