@@ -1,4 +1,4 @@
 - support command arguments (-i when a shell is invoked)
-- easy options: -a, -q
 - medium option: -F pipe
 - hard options: -r, -p, -d
+- fix norm

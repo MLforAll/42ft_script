@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/06 04:14:01 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/06 05:45:43 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,29 @@
 
 # define USE_LIBC_DIR		1
 # define PTSNAME_MAX_SIZE	128
+
+/*
+** Args Parsing
+*/
+
+# define OPTSTRING			"adF:pqr"
+
+enum			e_switches
+{
+	kSwitchA = 1 << 0,
+	kSwitchD = 1 << 1,
+	kSwitchF = 1 << 2,
+	kSwitchP = 1 << 4,
+	kSwitchQ = 1 << 5,
+	kSwitchR = 1 << 6
+};
+
+typedef struct	s_opts
+{
+	int			switches;
+	const char	*f_arg;
+	int			ind;
+}				t_opts;
 
 /*
 ** Types
@@ -37,6 +60,12 @@ typedef struct	s_cmd
 	int			shell;
 	int			reserved;
 }				t_cmd;
+
+/*
+** Options
+*/
+
+t_uint8			options_parse(int ac, const char **av, t_opts *ptr);
 
 /*
 ** cmdpath
