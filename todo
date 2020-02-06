@@ -1,5 +1,4 @@
 - support command arguments (-i when a shell is invoked)
-- write ft_getopt()
 - easy options: -a, -q
 - medium option: -F pipe
 - hard options: -r, -p, -d

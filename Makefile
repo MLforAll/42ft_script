@@ -6,7 +6,7 @@
 #    By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/13 20:41:05 by kdumarai          #+#    #+#              #
-#    Updated: 2020/02/06 00:09:31 by kdumarai         ###   ########.fr        #
+#    Updated: 2020/02/06 02:22:50 by kdumarai         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -29,7 +29,8 @@ SRCFILES = ft_script.c \
 			term.c \
 			cmdpath.c \
 			libc_utils.c \
-			utils.c
+			utils.c \
+			ft_getopt.c
 SRCS = $(addprefix $(SRCDIR)/, $(SRCFILES))
 NSRC = $(shell echo "$(SRCFILES)" | awk '{print NF}')
 ifeq ($(shell [ ! -z "`which bc`" ] && [ ! -z "`which awk`" ] && echo true),true)
