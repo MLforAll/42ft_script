@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   args.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kelian <kelian@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/06 05:19:16 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/06 05:47:42 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/06 23:25:50 by kelian           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ t_uint8	options_parse(int ac, const char **av, t_opts *ptr)
 	const char	*tmp;
 
 	ptr->switches = 0;
+	ptr->f_arg = NULL;
 	while ((rc = ft_getopt(ac, av, OPTSTRING)) != -1)
 	{
 		if ((tmp = ft_strchr(OPTSTRING, rc)))
@@ -26,6 +27,6 @@ t_uint8	options_parse(int ac, const char **av, t_opts *ptr)
 		if (rc == 'F')
 			ptr->f_arg = g_optarg;
 	}
-	ptr->ind = g_optind;
+	ptr->ind = g_optind - 1;
 	return ((rc == -1) ? YES : NO);
 }
