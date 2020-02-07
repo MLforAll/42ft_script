@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_getopt.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kelian <kelian@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/06 02:15:29 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/06 04:32:36 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/07 01:25:45 by kelian           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,13 @@
 #include "libft.h"
 #include "ft_getopt.h"
 
-#define GETOPT_ERR_NOMORE	-1
-#define GETOPT_ERR_ILL		-2
-#define GETOPT_ERR_REQ		-3
-
 const char	*g_optarg;
 int			g_optind = 1;
 int			g_optopt;
 int			g_opterr = 1;
 int			g_optreset;
 
-inline static void	ft_getopt_error(const char **av, int type)
+inline void			ft_getopt_error(const char **av, int opt, int type)
 {
 	const char	*typemsg;
 
@@ -37,7 +33,7 @@ inline static void	ft_getopt_error(const char **av, int type)
 		typemsg = "NULL";
 	ft_putstr_fd(*av, STDERR_FILENO);
 	ft_putstr_fd(typemsg, STDERR_FILENO);
-	ft_putchar_fd(g_optopt, STDERR_FILENO);
+	ft_putchar_fd((char)opt, STDERR_FILENO);
 	ft_putchar_fd('\n', STDERR_FILENO);
 }
 
@@ -99,7 +95,7 @@ int					ft_getopt(int ac, const char **av, const char *optstring)
 		if (rc < GETOPT_ERR_NOMORE)
 		{
 			if (g_opterr)
-				ft_getopt_error(av, rc);
+				ft_getopt_error(av, g_optopt, rc);
 			g_optarg = NULL;
 			return ('?');
 		}

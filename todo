@@ -1,4 +1,5 @@
 - support command arguments (-i when a shell is invoked)
-- medium option: -F pipe
+- write "command: /path/to/command" to typescript file when not a shell
 - hard options: -r, -p, -d
-- fix norm
+
+Norm: Rerun norminette

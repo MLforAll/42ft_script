@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_script.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kelian <kelian@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/06 05:47:29 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/07 02:56:05 by kelian           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ static uint8_t	send_stdin_to_fdm(t_pty *p)
 	return (TRUE);
 }
 
-static void		announce_script(const char *tsfile, int tsfd, uint8_t begin)
+static void		announce_script(t_typescript *ts, uint8_t begin)
 {
 	struct timeval	tp;
 	const char		*ct;
@@ -41,29 +41,24 @@ static void		announce_script(const char *tsfile, int tsfd, uint8_t begin)
 	if (begin)
 	{
 		ft_putstr("Script started, output file is ");
-		ft_putendl(tsfile);
-		ft_putstr_fd("Script started on ", tsfd);
-		ft_putstr_fd(ct, tsfd);
+		ft_putendl(ts->path);
+		ft_putstr_fd("Script started on ", ts->fd);
+		ft_putstr_fd(ct, ts->fd);
 		return ;
 	}
 	ft_putstr("\nScript done, output file is ");
-	ft_putendl(tsfile);
-	ft_putstr_fd("\nScript done on ", tsfd);
-	ft_putstr_fd(ct, tsfd);
+	ft_putendl(ts->path);
+	ft_putstr_fd("\nScript done on ", ts->fd);
+	ft_putstr_fd(ct, ts->fd);
 }
 
-static void		script(t_pty *p, const char *tsfile, t_opts *opts)
+static void		script(t_pty *p, t_typescript *ts, t_opts *opts)
 {
-	int		tsfd;
 	char	tsb[512];
 	ssize_t	rb;
 	fd_set	ss;
 
-	if ((tsfd = open(tsfile, O_WRONLY | O_CREAT \
-		| ((opts->switches & kSwitchA) ? O_APPEND : O_TRUNC), 0644)) < 0)
-		return ;
-	if (!(opts->switches & kSwitchQ))
-		announce_script(tsfile, tsfd, YES);
+	(!(opts->switches & kSwitchQ)) ? announce_script(ts, YES) : 0;
 	while (TRUE)
 	{
 		FD_ZERO(&ss);
@@ -76,15 +71,19 @@ static void		script(t_pty *p, const char *tsfile, t_opts *opts)
 		{
 			if ((rb = read(p->fdm, tsb, sizeof(tsb))) < 1)
 				break ;
-			ft_mwrites(STDOUT_FILENO, tsfd, tsb, rb);
+			(void)write(STDOUT_FILENO, tsb, rb);
+			(opts->switches & kSwitchF) ? (void)write(ts->fd, tsb, rb) \
+										: ft_bwrite(ts->fd, tsb, rb, NO);
 		}
 	}
-	if (!(opts->switches & kSwitchQ))
-		announce_script(tsfile, tsfd, NO);
-	(void)close(tsfd);
+	(!(opts->switches & kSwitchF)) ? ft_bwrite(ts->fd, NULL, 0, YES) : 0;
+	(!(opts->switches & kSwitchQ)) ? announce_script(ts, NO) : 0;
 }
 
-static void		fork_process(t_pty *pty, const char *cmdpath, const char *file, t_opts *opts)
+static void		fork_process(t_pty *pty, \
+								const char *cmdpath, \
+								t_typescript *ts, \
+								t_opts *opts)
 {
 	pid_t	pid;
 
@@ -97,15 +96,16 @@ static void		fork_process(t_pty *pty, const char *cmdpath, const char *file, t_o
 		_exit(127);
 	}
 	(void)close(pty->fds);
-	script(pty, file, opts);
+	script(pty, ts, opts);
 	(void)waitpid(pid, NULL, 0);
 	(void)close(pty->fdm);
 }
 
 int				main(int ac, const char **av)
 {
-	t_pty	pty;
-	t_opts	opts;
+	t_pty			pty;
+	t_opts			opts;
+	t_typescript	ts;
 
 	if (!pty_new(&pty))
 		ft_sfatal("Could not create new pseudo-terminal", 1);
@@ -115,11 +115,14 @@ int				main(int ac, const char **av)
 		return (EXIT_FAILURE);
 	ac -= opts.ind;
 	av += opts.ind;
-	(void)configure_inherited_tty(NO);
-	fork_process(&pty, \
-		cmd_path((ac > 2) ? av[2] : NULL), \
-		(ac > 1) ? av[1] : "typescript", \
-		&opts);
+	ts.path = (ac > 1) ? av[1] : "typescript";
+	if ((ts.fd = open(ts.path, O_WRONLY | O_CREAT \
+		| ((opts.switches & kSwitchA) ? O_APPEND : O_TRUNC), 0644)) < 0)
+		ft_sfatal("Could not open typescript file for writing", 1);
+	if (!configure_inherited_tty(NO))
+		ft_sfatal("Could not configure inherited tty", 1);
+	fork_process(&pty, cmd_path((ac > 2) ? av[2] : NULL), &ts, &opts);
 	(void)configure_inherited_tty(YES);
+	(void)close(ts.fd);
 	return (EXIT_SUCCESS);
 }

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_script.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
+/*   By: kelian <kelian@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/06 05:45:43 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/07 02:49:21 by kelian           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,16 +23,16 @@
 ** Args Parsing
 */
 
-# define OPTSTRING			"adF:pqr"
+# define OPTSTRING			"adFpqr"
 
 enum			e_switches
 {
 	kSwitchA = 1 << 0,
 	kSwitchD = 1 << 1,
 	kSwitchF = 1 << 2,
-	kSwitchP = 1 << 4,
-	kSwitchQ = 1 << 5,
-	kSwitchR = 1 << 6
+	kSwitchP = 1 << 3,
+	kSwitchQ = 1 << 4,
+	kSwitchR = 1 << 5
 };
 
 typedef struct	s_opts
@@ -60,6 +60,12 @@ typedef struct	s_cmd
 	int			shell;
 	int			reserved;
 }				t_cmd;
+
+typedef struct	s_typescript
+{
+	const char	*path;
+	int			fd;
+}				t_typescript;
 
 /*
 ** Options
@@ -101,5 +107,6 @@ void			ft_sfatal(const char *msg, int status);
 void			ft_putstr_fds(const char *s, int fd1, int fd2);
 void			ft_putendl_fds(const char *s, int fd1, int fd2);
 void			ft_mwrites(int fd1, int fd2, const void *buff, size_t nbytes);
+void			ft_bwrite(int fd, const void *data, size_t nbytes, t_uint8 rst);
 
 #endif
