@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/08 01:26:59 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/08 21:31:17 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,7 @@ typedef struct	s_cmd
 	char		**args;
 	char		*shargs[3];
 	int			shell;
-	int			reserved;
+	int			runenv;
 }				t_cmd;
 
 typedef struct	s_typescript

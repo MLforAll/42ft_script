@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/08 01:59:30 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/08 21:31:43 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/select.h>
+#include <sys/mman.h>
 
 #include "ft_script.h"
 
@@ -56,12 +57,35 @@ static void		script(t_pty *p, t_typescript *ts, t_cmd *cmd, t_opts *opts)
 	(!(opts->switches & kSwitchQ)) ? announce_script(ts, cmd, NO) : 0;
 }
 
+static void		exec_process(t_cmd *cmd)
+{
+	extern char	**environ;
+	void		*map;
+	size_t		sz;
+	size_t		idx;
+
+	if (!cmd->runenv)
+	{
+		(void)execve(cmd->path, cmd->args, environ);
+		return ;
+	}
+	sz = (ft_tablen(cmd->args) + 1) * sizeof(char *);
+	map = mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
+	if (!map)
+		return ;
+	*(char **)map = "/usr/bin/env";
+	idx = 0;
+	while (cmd->args[idx++])
+		((char **)map)[idx] = cmd->args[idx - 1];
+	((char **)map)[idx] = NULL;
+	(void)execve(*(char **)map, map, environ);
+}
+
 static int		fork_process(t_pty *pty, \
 								t_cmd *cmd, \
 								t_typescript *ts, \
 								t_opts *opts)
 {
-	extern char	**environ;
 	pid_t		pid;
 	int			status;
 
@@ -70,7 +94,7 @@ static int		fork_process(t_pty *pty, \
 	if (pid == 0)
 	{
 		pty_child_attach(pty);
-		(void)execve(cmd->path, cmd->args, environ);
+		exec_process(cmd);
 		ft_putstr("./ft_script: ");
 		if (cmd->path)
 		{

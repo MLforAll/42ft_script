@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/05 23:57:22 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/08 01:26:45 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/08 21:21:18 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,9 +74,15 @@ void						cmd_init(t_cmd *ptr, const char **av)
 		return ;
 	}
 	if (USE_LIBC_DIR && (tmp = ft_getenv("PATH")))
+	{
 		ptr->path = cmd_path_pathenv(tmp, *av);
+		ptr->runenv = NO;
+	}
 	else
+	{
 		ptr->path = *av;
+		ptr->runenv = YES;
+	}
 	ptr->args = (char **)(uintptr_t)av;
 	ptr->shell = NO;
 }
