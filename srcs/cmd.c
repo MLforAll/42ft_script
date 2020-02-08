@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   cmdpath.c                                          :+:      :+:    :+:   */
+/*   cmd.c                                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/05 23:57:22 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/06 00:07:24 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/08 01:26:45 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,16 +58,25 @@ static const char			*cmd_path_pathenv(char *pathenv, const char *cmd)
 
 #endif
 
-const char					*cmd_path(const char *cmd)
+void						cmd_init(t_cmd *ptr, const char **av)
 {
 	char	*tmp;
 
-	if (!cmd)
+	if (!av)
 	{
 		tmp = ft_getenv("SHELL");
-		return (tmp ? tmp : "/bin/sh");
+		ptr->path = (tmp) ? tmp : "/bin/sh";
+		ptr->shargs[0] = (char *)(uintptr_t)ptr->path;
+		ptr->shargs[1] = "-i";
+		ptr->shargs[2] = NULL;
+		ptr->args = ptr->shargs;
+		ptr->shell = YES;
+		return ;
 	}
 	if (USE_LIBC_DIR && (tmp = ft_getenv("PATH")))
-		return (cmd_path_pathenv(tmp, cmd));
-	return (cmd);
+		ptr->path = cmd_path_pathenv(tmp, *av);
+	else
+		ptr->path = *av;
+	ptr->args = (char **)(uintptr_t)av;
+	ptr->shell = NO;
 }

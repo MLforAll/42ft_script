@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_script.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kelian <kelian@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/07 02:49:21 by kelian           ###   ########.fr       */
+/*   Updated: 2020/02/08 01:26:59 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,8 @@ typedef struct	s_pty
 typedef struct	s_cmd
 {
 	const char	*path;
-	const char	**args;
+	char		**args;
+	char		*shargs[3];
 	int			shell;
 	int			reserved;
 }				t_cmd;
@@ -68,16 +69,22 @@ typedef struct	s_typescript
 }				t_typescript;
 
 /*
+** Logs
+*/
+
+void			announce_script(t_typescript *ts, t_cmd *cmd, t_uint8 begin);
+
+/*
 ** Options
 */
 
 t_uint8			options_parse(int ac, const char **av, t_opts *ptr);
 
 /*
-** cmdpath
+** cmd
 */
 
-const char		*cmd_path(const char *cmd);
+void			cmd_init(t_cmd *ptr, const char **av);
 
 /*
 ** Term

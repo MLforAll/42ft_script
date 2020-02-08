@@ -1,5 +1,4 @@
-- support command arguments (-i when a shell is invoked)
-- write "command: /path/to/command" to typescript file when not a shell
+- use /usr/bin/env to run cmd via PATH
 - hard options: -r, -p, -d
 
 Norm: Rerun norminette
