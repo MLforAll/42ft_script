@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/08 21:31:17 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/09 04:38:24 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 # define FT_SCRIPT_H
 
 # include <termios.h>
+# include <sys/uio.h>
 # include "libft.h"
 
 # define USE_LIBC_DIR		1
@@ -68,6 +69,40 @@ typedef struct	s_typescript
 	int			fd;
 }				t_typescript;
 
+typedef struct	s_rts_record
+{
+	t_uint32	pad;
+	t_uint32	timestamp;
+	t_uint32	tspad;
+	t_uint32	ntimestamp;
+	t_uint32	direction;
+	t_int32		start;
+}				t_rts_record;
+
+typedef struct	s_rts_hdr
+{
+	t_uint32		pad;
+	t_rts_record	initial_record;
+}				t_rts_hdr;
+
+typedef struct	s_rts
+{
+	void		*map;
+	size_t		sz;
+	void		*endptr;
+	t_rts_hdr	*hdr;
+}				t_rts;
+
+/*
+** Main
+*/
+
+int				fork_process(t_pty *pty, \
+								t_cmd *cmd, \
+								t_typescript *ts, \
+								t_opts *opts);
+int				play_file(t_typescript *ts, t_opts *opts);
+
 /*
 ** Logs
 */
@@ -104,6 +139,11 @@ void			pty_close(t_pty *p);
 /*
 ** Utils
 */
+
+t_rts_record	*next_record(t_rts *rts, t_rts_record *r);
+t_uint8			get_record_string(t_rts *rts, \
+									t_rts_record *r, \
+									struct iovec *ptr);
 
 int				ft_ptsname_r(int fd, char *buff, size_t max);
 char			*ft_ptsname(int fd);

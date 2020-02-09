@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:30:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/04 06:21:44 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/09 05:08:59 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,9 +28,14 @@ t_uint8		pty_new(t_pty *out)
 
 t_uint8		pty_slave_open(t_pty *p)
 {
-	if (ioctl(p->fdm, TIOCPTYGRANT) != 0 || ioctl(p->fdm, TIOCPTYUNLK) != 0)
+	struct winsize	ws;
+
+	if (ioctl(p->fdm, TIOCPTYGRANT) != 0 || ioctl(p->fdm, TIOCPTYUNLK) != 0 \
+		|| (p->fds = open(p->ptsname, O_RDWR)) == -1)
 		return (FALSE);
-	return ((p->fds = open(p->ptsname, O_RDWR)) != -1);
+	if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == 0)
+		(void)ioctl(p->fds, TIOCSSIZE, &ws);
+	return (TRUE);
 }
 
 inline void	pty_child_attach(t_pty *p)

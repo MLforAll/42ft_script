@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kelian <kelian@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:11:02 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/07 02:59:27 by kelian           ###   ########.fr       */
+/*   Updated: 2020/02/09 05:02:55 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,10 +41,10 @@ inline void	ft_mwrites(int fd1, int fd2, const void *buff, size_t nbytes)
 
 void		ft_bwrite(int fd, const void *data, size_t nbytes, t_uint8 reset)
 {
-	static unsigned char	buff[64];
+	static unsigned char	buff[512];
 	static size_t			bfill;
 
-	if (reset || bfill + nbytes > sizeof(buff))
+	if (bfill > 0 && (reset || bfill + nbytes > sizeof(buff)))
 	{
 		(void)write(fd, buff, bfill);
 		if (reset < 2)
@@ -55,6 +55,11 @@ void		ft_bwrite(int fd, const void *data, size_t nbytes, t_uint8 reset)
 	}
 	if (!data || !nbytes)
 		return ;
+	if (nbytes > sizeof(buff) - bfill)
+	{
+		(void)write(fd, data, nbytes);
+		return ;
+	}
 	(void)ft_memcpy(buff + bfill, data, nbytes);
 	bfill += nbytes;
 }
