@@ -1,4 +1,3 @@
 - hard options: -r, -p, -d
 	-r: record session with input, output and timestamping
 	-p: play recorded session (with time)
-	-d: when used with -p, skip timestamps. does nothing without -p
