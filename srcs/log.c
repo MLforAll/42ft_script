@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/08 01:03:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/08 01:29:53 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/10 01:07:09 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,26 +27,40 @@ inline static void	announce_script_command(t_cmd *cmd, int tsfd)
 	ft_putchar_fd('\n', tsfd);
 }
 
-void				announce_script(t_typescript *ts, t_cmd *cmd, t_uint8 begin)
+void				announce_script_time(int fd, \
+										time_t time, \
+										t_uint8 ftime, \
+										t_uint8 begin)
 {
 	struct timeval	tp;
 	const char		*ct;
 	int				rc;
 
-	rc = gettimeofday(&tp, NULL);
-	ct = (rc == 0) ? ctime(&tp.tv_sec) : "NULL";
+	if (ftime)
+	{
+		rc = gettimeofday(&tp, NULL);
+		time = (time_t)tp.tv_sec;
+	}
+	else
+		rc = 0;
+	ct = (rc == 0) ? ctime(&time) : "NULL";
+	ft_putstr_fd((begin) ? "Script started on " : "\nScript done on ", fd);
+	ft_putstr_fd(ct, fd);
+}
+
+void				announce_script(t_typescript *ts, t_cmd *cmd, t_uint8 begin)
+{
+
 	if (begin)
 	{
 		ft_putstr("Script started, output file is ");
 		ft_putendl(ts->path);
-		ft_putstr_fd("Script started on ", ts->fd);
-		ft_putstr_fd(ct, ts->fd);
+		announce_script_time(ts->fd, 0, YES, YES);
 		if (!cmd->shell)
 			announce_script_command(cmd, ts->fd);
 		return ;
 	}
 	ft_putstr("\nScript done, output file is ");
 	ft_putendl(ts->path);
-	ft_putstr_fd("\nScript done on ", ts->fd);
-	ft_putstr_fd(ct, ts->fd);
+	announce_script_time(ts->fd, 0, YES, NO);
 }

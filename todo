@@ -1,3 +1,3 @@
 - hard options: -r, -p, -d
 	-r: record session with input, output and timestamping
-	-p: play recorded session (with time)
+- fix -p (play) sleeps

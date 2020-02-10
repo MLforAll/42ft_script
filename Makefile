@@ -6,7 +6,7 @@
 #    By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/13 20:41:05 by kdumarai          #+#    #+#              #
-#    Updated: 2020/02/09 04:29:47 by kdumarai         ###   ########.fr        #
+#    Updated: 2020/02/10 00:23:09 by kdumarai         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,7 +32,6 @@ SRCFILES = ft_script.c \
 			pty.c \
 			term.c \
 			cmd.c \
-			record_utils.c \
 			libc_utils.c \
 			utils.c \
 			ft_getopt.c
