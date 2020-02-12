@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/09 23:39:10 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/12 02:13:05 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,10 @@
 
 #include "ft_script.h"
 
-static int		run_live(int ac, const char **av, t_typescript *ts, t_opts *opts)
+static int		run_live(int ac, \
+						const char **av, \
+						t_typescript *ts, \
+						t_opts *opts)
 {
 	t_pty			pty;
 	t_cmd			cmd;

@@ -11,19 +11,12 @@
 
 struct rtsrecord
 {
-	uint32_t	pad;
+	uint32_t	size;
+	uint32_t	bpad;
 	uint32_t	timestamp;
-	uint32_t	tspad;
-	uint32_t	ntimestamp;
-	uint32_t	direction; // 1 byte used
-	char		start; // end of string = ascii 0x1 (soh - start of heading)
-};
-
-struct rtshdr
-{
-	uint32_t		pad;
-	struct rtsrecord	hdr;
-	// series of struct rtsrecord
+	uint32_t	apad;
+	uint32_t	utimestamp;
+	uint32_t	direction;
 };
 
 static size_t
@@ -45,85 +38,86 @@ read_file(const char *path, char **out)
 	return sz;
 }
 
+#define HEX_CHARSET	"0123456789abcdef"
+
 static void
 print_recorded_string(struct rtsrecord *r, void *endptr)
 {
 	char	*s;
-	size_t	len;
+	uint8_t	d;
+	uint8_t	shift;
 
-	s = &r->start;
-	len = 0;
-	while (s[len] != 0x1 && s[len] != 0x2)
+	if (r->size == 0)
+		return ;
+
+	s = (char *)((uintptr_t)r + sizeof(struct rtsrecord));
+	(void) write(1, s, r->size);
+	(void) write(1, "\n", 1);
+
+	shift = 0;
+	for (uint32_t idx = 0; idx < r->size; idx++)
 	{
-		if ((void *)(s + len) > endptr)
-			return ;
-		len++;
+		if (shift > 1)
+		{
+			(void) write(1, " ", 1);
+			shift = 0;
+		}
+
+		d = s[idx] / 16;
+		(void) write(1, &HEX_CHARSET[d], 1);
+		d = s[idx] % 16;
+		(void) write(1, &HEX_CHARSET[d], 1);
+
+		shift++;
 	}
-	(void) write(1, s, len);
 }
 
 inline static void
 print_rtsrecord(struct rtsrecord *r, void *endptr, uint8_t debug)
 {
 	if (debug)
-		(void) printf("----\ntimestamp: %u: %sntimestamp: %u\ndirection: %u (%c)\n", \
-		r->timestamp, ctime((time_t *)&r->timestamp), r->ntimestamp, r->direction, (char)r->direction);
+		(void) printf("----\ntimestamp: %u: %sutimestamp: %u\ndirection: %c\nsize: %u\n", \
+		r->timestamp, ctime((time_t *)&r->timestamp), r->utimestamp, \
+		(char)r->direction, r->size);
 	print_recorded_string(r, endptr);
-	if (debug)
+	if (debug && r->size)
 		(void) write(1, "\n", 1);
 }
 
-static struct rtsrecord *
+inline static struct rtsrecord *
 next_rtsrecord(struct rtsrecord *r, void *endptr)
 {
-	char	*s;
-	struct rtsrecord *ret;
+	struct rtsrecord	*ret;
 
-	s = &r->start;
-	while (*s != 0x1 && *s != 0x2)
-	{
-		if ((void *)s > endptr)
-			return NULL;
-		s++;
-	}
-	ret = (struct rtsrecord *)(s + 4);
-	return (void *)ret > endptr ? NULL : ret;
+	ret = (struct rtsrecord *)((uintptr_t)r + sizeof(struct rtsrecord) + r->size);
+	if ((void *)ret > endptr)
+		return NULL;
+	return ret;
 }
 
-#define PRINT_DEBUG	0
+#define PRINT_DEBUG	1
 
 int
 main(int ac, const char **av)
 {
 	char					*content;
 	size_t					sz;
-	char					*endptr;
-	struct rtshdr			*hdr;
+	void					*endptr;
 	struct rtsrecord		*r, *nr;
-	struct timespec			rq;
 
 	if (ac < 2)
 		errx(1, "usage: %s /path/to/file", *av);
+
 	sz = read_file(av[1], &content);
-	endptr = content + sz;
-	(void) printf("file starts at %p for %zu\n\n", content, sz);
+	endptr = (void *)(content + sz);
 
-	hdr = (struct rtshdr *)content;
-
-	r = &hdr->hdr;
-	nr = (struct rtsrecord *)(content + sizeof(struct rtshdr));
-	while (r && nr)
+	(void) printf("file starts at %p for %zu\n", content, sz);
+	r = (struct rtsrecord *)content;
+	while ((nr = next_rtsrecord(r, endptr)))
 	{
-		if (r->direction == 'o')
-			print_rtsrecord(r, endptr, PRINT_DEBUG);
-		rq.tv_sec = nr->timestamp - r->timestamp;
-		if (r->ntimestamp < nr->ntimestamp)
-			rq.tv_nsec = (nr->ntimestamp - r->ntimestamp) * 1000;
-		else
-			rq.tv_nsec = (r->ntimestamp - nr->ntimestamp) * 1000;
-		(void) nanosleep(&rq, NULL);
+		print_rtsrecord(r, endptr, PRINT_DEBUG);
 		r = nr;
-		nr = next_rtsrecord(r, endptr);
 	}
+
 	return 0;
 }

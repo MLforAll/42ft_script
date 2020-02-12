@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/08 01:03:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/10 01:07:09 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/12 02:12:34 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ void				announce_script_time(int fd, \
 
 void				announce_script(t_typescript *ts, t_cmd *cmd, t_uint8 begin)
 {
-
 	if (begin)
 	{
 		ft_putstr("Script started, output file is ");

@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/10 01:06:19 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/12 02:30:44 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,10 +81,10 @@ enum			e_rts_direction
 typedef struct	s_rts_record
 {
 	t_uint32	size;
-	t_uint32	pad;
+	t_uint32	szpad;
 	t_uint32	timestamp;
 	t_uint32	tspad;
-	t_uint32	ntimestamp;
+	t_uint32	utimestamp;
 	t_uint32	direction;
 }				t_rts_record;
 
