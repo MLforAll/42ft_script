@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   args.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kelian <kelian@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/06 05:19:16 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/07 02:15:44 by kelian           ###   ########.fr       */
+/*   Updated: 2020/02/12 03:06:51 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,10 @@ static t_uint8	options_parse_getopt(int ac, const char **av, t_opts *ptr)
 	ptr->switches = 0;
 	while ((rc = ft_getopt(ac, av, OPTSTRING)) != -1 && rc != '?')
 	{
-		if (rc == 'F')
+		if (rc == 't')
 		{
-			ptr->switches |= kSwitchF;
-			ptr->f_arg = g_optarg;
+			ptr->switches |= 0;
+			ptr->arg = g_optarg;
 		}
 		else if ((tmp = ft_strchr(OPTSTRING, rc)))
 			ptr->switches |= (enum e_switches)(1 << (tmp - OPTSTRING));
@@ -38,7 +38,7 @@ t_uint8			options_parse(int ac, const char **av, t_opts *ptr)
 	int		rc;
 	int		idx;
 
-	ptr->f_arg = NULL;
+	ptr->arg = NULL;
 	if (ft_strchr(OPTSTRING, ':'))
 		return (options_parse_getopt(ac, av, ptr));
 	idx = 1;

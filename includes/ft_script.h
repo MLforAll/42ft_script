@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 02:30:44 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/12 03:05:45 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,7 +39,7 @@ enum			e_switches
 typedef struct	s_opts
 {
 	int			switches;
-	const char	*f_arg;
+	const char	*arg;
 	int			ind;
 }				t_opts;
 
@@ -93,7 +93,7 @@ typedef struct	s_rts
 	void			*map;
 	size_t			sz;
 	void			*endptr;
-	t_rts_record	*initial_record;
+	t_rts_record	*firstr;
 }				t_rts;
 
 /*

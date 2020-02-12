@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/09 03:59:44 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/09 04:01:11 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/12 06:47:16 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,46 +14,83 @@
 #include <stdlib.h>
 #include <sys/select.h>
 #include <sys/mman.h>
+#include <sys/time.h>
 
 #include "ft_script.h"
 
-static uint8_t	send_stdin_to_fdm(t_pty *p)
+static void		script_write_record(t_typescript *ts, \
+									const char *data, \
+									size_t sz, \
+									enum e_rts_direction dir)
 {
-	char	buff[16];
+	t_rts_record	rec;
+	struct timeval	sp;
+
+	if (gettimeofday(&sp, NULL) != 0)
+		return ;
+	ft_bzero(&rec, sizeof(t_rts_record));
+	rec.size = (t_uint32)sz;
+	rec.timestamp = (t_uint32)sp.tv_sec;
+	rec.utimestamp = (t_uint32)sp.tv_usec;
+	rec.direction = (t_uint32)dir;
+	(void)write(ts->fd, &rec, sizeof(t_rts_record));
+	if (data && sz)
+		(void)write(ts->fd, data, sz);
+}
+
+static t_uint8	script_write(t_pty *p, \
+							t_typescript *ts, \
+							fd_set *setref, \
+							t_opts *opts)
+{
+	char	tsb[1024];
 	ssize_t	rb;
 
-	if ((rb = read(STDIN_FILENO, buff, sizeof(buff))) < 1)
-		return (FALSE);
-	(void)write(p->fdm, buff, rb);
+	if (FD_ISSET(STDIN_FILENO, setref))
+	{
+		if ((rb = read(STDIN_FILENO, tsb, sizeof(tsb))) < 1)
+			return (FALSE);
+		(void)write(p->fdm, tsb, rb);
+		if (opts->switches & kSwitchR)
+			script_write_record(ts, tsb, rb, kDirectionInput);
+	}
+	if (FD_ISSET(p->fdm, setref))
+	{
+		if ((rb = read(p->fdm, tsb, sizeof(tsb))) < 1)
+			return (FALSE);
+		(void)write(STDOUT_FILENO, tsb, rb);
+		if (opts->switches & kSwitchR)
+			script_write_record(ts, tsb, rb, kDirectionOutput);
+		else
+			(opts->switches & kSwitchF) ? (void)write(ts->fd, tsb, rb) \
+										: ft_bwrite(ts->fd, tsb, rb, NO);
+	}
 	return (TRUE);
 }
 
 static void		script(t_pty *p, t_typescript *ts, t_cmd *cmd, t_opts *opts)
 {
-	char	tsb[512];
-	ssize_t	rb;
 	fd_set	ss;
 
-	(!(opts->switches & kSwitchQ)) ? announce_script(ts, cmd, YES) : 0;
+	if (opts->switches & kSwitchR)
+		script_write_record(ts, NULL, 0, kDirectionStart);
+	else if (!(opts->switches & kSwitchQ))
+		announce_script(ts, cmd, YES);
 	while (TRUE)
 	{
 		FD_ZERO(&ss);
 		FD_SET(p->fdm, &ss);
 		FD_SET(STDIN_FILENO, &ss);
 		if (select(p->fdm + 1, &ss, NULL, NULL, NULL) < 1 \
-			|| (FD_ISSET(STDIN_FILENO, &ss) && !send_stdin_to_fdm(p)))
+			|| !script_write(p, ts, &ss, opts))
 			break ;
-		if (FD_ISSET(p->fdm, &ss))
-		{
-			if ((rb = read(p->fdm, tsb, sizeof(tsb))) < 1)
-				break ;
-			(void)write(STDOUT_FILENO, tsb, rb);
-			(opts->switches & kSwitchF) ? (void)write(ts->fd, tsb, rb) \
-										: ft_bwrite(ts->fd, tsb, rb, NO);
-		}
 	}
-	(!(opts->switches & kSwitchF)) ? ft_bwrite(ts->fd, NULL, 0, YES) : 0;
-	(!(opts->switches & kSwitchQ)) ? announce_script(ts, cmd, NO) : 0;
+	if (!(opts->switches & kSwitchF))
+		ft_bwrite(ts->fd, NULL, 0, YES);
+	if (opts->switches & kSwitchR)
+		script_write_record(ts, NULL, 0, kDirectionStart);
+	else if (!(opts->switches & kSwitchQ))
+		announce_script(ts, cmd, NO);
 }
 
 static void		exec_process(t_cmd *cmd)
@@ -85,8 +122,8 @@ int				fork_process(t_pty *pty, \
 								t_typescript *ts, \
 								t_opts *opts)
 {
-	pid_t		pid;
-	int			status;
+	pid_t	pid;
+	int		status;
 
 	if ((pid = fork()) == -1)
 		ft_sfatal("fork() failed", 1);

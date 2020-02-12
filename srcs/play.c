@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/09 02:54:55 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 02:30:53 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/12 03:05:25 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,12 @@ static t_uint8				map_file(t_rts *ptr, t_typescript *ts)
 		return (FALSE);
 	ptr->sz = sz;
 	ptr->endptr = (void *)((t_uintptr)ptr->map + ptr->sz);
-	ptr->initial_record = (t_rts_record *)ptr->map;
+	ptr->firstr = (t_rts_record *)ptr->map;
+	if (!ft_memfitsinbuff(NULL, ptr->firstr, sizeof(t_rts_record), ptr->endptr))
+	{
+		(void)munmap(ptr->map, sz);
+		return (FALSE);
+	}
 	return (TRUE);
 }
 
@@ -54,11 +59,14 @@ static void					records_sleep(t_rts_record *r, t_rts_record *nr)
 	(void)nanosleep(&rq, NULL);
 }
 
-inline static const char	*get_record_data(t_rts_record *r)
+inline static void			print_record_data(t_rts_record *r)
 {
-	if (r->size)
-		return ((const char *)((t_uintptr)r + sizeof(t_rts_record)));
-	return (NULL);
+	const char	*data;
+
+	if (r->size == 0)
+		return ;
+	data = (const char *)((t_uintptr)r + sizeof(t_rts_record));
+	(void)write(STDOUT_FILENO, data, r->size);
 }
 
 inline static t_rts_record	*next_record(t_rts *rts, \
@@ -81,22 +89,21 @@ int							play_file(t_typescript *ts, t_opts *opts)
 	t_rts			rts;
 	t_rts_record	*r;
 	t_rts_record	*nr;
-	const char		*data;
 
 	if (!map_file(&rts, ts))
 		return (EXIT_FAILURE);
-	r = rts.initial_record;
+	r = rts.firstr;
 	while (TRUE)
 	{
 		if (r->direction == kDirectionStart && !(opts->switches & kSwitchQ))
 			announce_script_time(STDOUT_FILENO, (time_t)r->timestamp, NO, YES);
-		if (r->direction == kDirectionOutput && (data = get_record_data(r)))
-			(void)write(STDOUT_FILENO, data, r->size);
+		if (r->direction == kDirectionOutput)
+			print_record_data(r);
 		if (r->direction == kDirectionEnd && !(opts->switches & kSwitchQ))
 			announce_script_time(STDOUT_FILENO, (time_t)r->timestamp, NO, NO);
 		if (!(nr = next_record(&rts, r, kDirectionInput)))
 			break ;
-		if (!(opts->switches & kSwitchD))
+		if (!(opts->switches & kSwitchD) && nr->direction != kDirectionStart)
 			records_sleep(r, nr);
 		r = nr;
 	}
