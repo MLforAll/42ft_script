@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 03:05:45 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 03:34:01 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include <time.h>
 # include "libft.h"
 
-# define USE_LIBC_DIR		1
+# define USE_LIBC_DIR		0
 # define PTSNAME_MAX_SIZE	128
 
 /*
@@ -33,13 +33,14 @@ enum			e_switches
 	kSwitchF = 1 << 2,
 	kSwitchP = 1 << 3,
 	kSwitchQ = 1 << 4,
-	kSwitchR = 1 << 5
+	kSwitchR = 1 << 5,
+	kSwitchT = 1 << 6
 };
 
 typedef struct	s_opts
 {
-	int			switches;
 	const char	*arg;
+	int			switches;
 	int			ind;
 }				t_opts;
 
@@ -67,6 +68,7 @@ typedef struct	s_typescript
 {
 	const char	*path;
 	int			fd;
+	int			reserved;
 }				t_typescript;
 
 enum			e_rts_direction
@@ -80,10 +82,8 @@ enum			e_rts_direction
 
 typedef struct	s_rts_record
 {
-	t_uint32	size;
-	t_uint32	szpad;
-	t_uint32	timestamp;
-	t_uint32	tspad;
+	t_uint64	size;
+	t_uint64	timestamp;
 	t_uint32	utimestamp;
 	t_uint32	direction;
 }				t_rts_record;
@@ -104,6 +104,11 @@ int				fork_process(t_pty *pty, \
 								t_cmd *cmd, \
 								t_typescript *ts, \
 								t_opts *opts);
+
+t_uint8			next_record(t_rts_record **out, \
+						t_rts *rts, \
+						t_rts_record *r, \
+						enum e_rts_direction not_dir);
 int				play_file(t_typescript *ts, t_opts *opts);
 
 /*
@@ -114,7 +119,10 @@ void			announce_script_time(int fd, \
 									time_t time, \
 									t_uint8 ftime, \
 									t_uint8 begin);
-void			announce_script(t_typescript *ts, t_cmd *cmd, t_uint8 begin);
+void			announce_script(t_typescript *ts, \
+								t_cmd *cmd, \
+								t_uint8 begin, \
+								t_uint8 recorded);
 
 /*
 ** Options
@@ -144,6 +152,12 @@ void			pty_child_attach(t_pty *p);
 void			pty_close(t_pty *p);
 
 /*
+** Bonuses
+*/
+
+void			install_timer(t_typescript *ts, t_opts *opts);
+
+/*
 ** Utils
 */
 
@@ -152,7 +166,7 @@ char			*ft_ptsname(int fd);
 int				ft_tcgetattr(int fd, struct termios *t);
 int				ft_tcsetattr(int fd, int opts, const struct termios *t);
 
-void			ft_sfatal(const char *msg, int status);
+void			sfatal(const char *msg, int status) __attribute__((noreturn));
 void			ft_putstr_fds(const char *s, int fd1, int fd2);
 void			ft_putendl_fds(const char *s, int fd1, int fd2);
 void			ft_mwrites(int fd1, int fd2, const void *buff, size_t nbytes);

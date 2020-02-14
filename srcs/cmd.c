@@ -6,10 +6,11 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/05 23:57:22 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/08 21:21:18 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 03:35:36 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 #include "ft_script.h"
 
 #if USE_LIBC_DIR
@@ -45,7 +46,7 @@ static const char			*cmd_path_pathenv(char *pathenv, const char *cmd)
 		pathenv[tmp - pathenv] = ':';
 		pathenv = tmp + 1;
 	}
-	return (NULL);
+	return (cmd);
 }
 
 #else
@@ -81,7 +82,7 @@ void						cmd_init(t_cmd *ptr, const char **av)
 	else
 	{
 		ptr->path = *av;
-		ptr->runenv = YES;
+		ptr->runenv = access(*av, X_OK) == 0 ? NO : YES;
 	}
 	ptr->args = (char **)(uintptr_t)av;
 	ptr->shell = NO;

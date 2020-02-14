@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/06 05:19:16 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 03:06:51 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 02:39:58 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ static t_uint8	options_parse_getopt(int ac, const char **av, t_opts *ptr)
 	{
 		if (rc == 't')
 		{
-			ptr->switches |= 0;
+			ptr->switches |= kSwitchT;
 			ptr->arg = g_optarg;
 		}
 		else if ((tmp = ft_strchr(OPTSTRING, rc)))

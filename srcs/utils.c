@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:11:02 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 02:32:53 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 03:00:06 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 #include "ft_script.h"
 
-void		ft_sfatal(const char *msg, int status)
+void		sfatal(const char *msg, int status)
 {
 	ft_putendl_fd(msg, STDERR_FILENO);
 	_exit(status <= 0 ? 1 : status);

@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/08 01:03:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 06:44:17 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 02:07:12 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,23 +43,30 @@ void				announce_script_time(int fd, \
 	}
 	else
 		rc = 0;
-	ct = (rc == 0) ? ctime(&time) : "NULL";
+	ct = (rc == 0) ? ctime(&time) : NULL;
 	ft_putstr_fd((begin) ? "Script started on " : "\nScript done on ", fd);
-	ft_putstr_fd(ct, fd);
+	ft_putstrsec_fd(ct, fd);
 }
 
-void				announce_script(t_typescript *ts, t_cmd *cmd, t_uint8 begin)
+void				announce_script(t_typescript *ts, \
+									t_cmd *cmd, \
+									t_uint8 begin, \
+									t_uint8 recorded)
 {
 	if (begin)
 	{
 		ft_putstr("Script started, output file is ");
 		ft_putendl(ts->path);
-		announce_script_time(ts->fd, 0, YES, YES);
-		if (!cmd->shell)
-			announce_script_command(cmd, ts->fd);
+		if (!recorded)
+		{
+			announce_script_time(ts->fd, 0, YES, YES);
+			if (!cmd->shell)
+				announce_script_command(cmd, ts->fd);
+		}
 		return ;
 	}
 	ft_putstr("\nScript done, output file is ");
 	ft_putendl(ts->path);
-	announce_script_time(ts->fd, 0, YES, NO);
+	if (!recorded)
+		announce_script_time(ts->fd, 0, YES, NO);
 }

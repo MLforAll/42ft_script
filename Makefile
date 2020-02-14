@@ -6,7 +6,7 @@
 #    By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2018/08/13 20:41:05 by kdumarai          #+#    #+#              #
-#    Updated: 2020/02/12 02:32:59 by kdumarai         ###   ########.fr        #
+#    Updated: 2020/02/14 03:22:47 by kdumarai         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,12 +27,14 @@ SRCDIR = srcs
 SRCFILES = ft_script.c \
 			live.c \
 			play.c \
+			play_utils.c \
 			args.c \
 			log.c \
 			pty.c \
 			term.c \
 			cmd.c \
 			utils.c \
+			timer.c \
 			ft_getopt.c
 SRCS = $(addprefix $(SRCDIR)/, $(SRCFILES))
 NSRC = $(shell echo "$(SRCFILES)" | awk '{print NF}')

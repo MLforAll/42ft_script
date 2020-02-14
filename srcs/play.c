@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/09 02:54:55 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 03:05:25 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 02:17:14 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,29 +18,32 @@
 
 #include "ft_script.h"
 
-static t_uint8				map_file(t_rts *ptr, t_typescript *ts)
+static t_uint8		map_file(t_rts *ptr, t_typescript *ts)
 {
 	struct stat	st;
 	size_t		sz;
 
 	if (fstat(ts->fd, &st) != 0)
+	{
+		ft_putendl_fd("ft_script: fstat failed", STDERR_FILENO);
 		return (FALSE);
-	sz = st.st_size;
+	}
+	sz = (size_t)st.st_size;
+	if (sz < sizeof(t_rts_record))
+		return (FALSE);
 	ptr->map = mmap(NULL, sz, PROT_READ, MAP_FILE | MAP_PRIVATE, ts->fd, 0);
 	if (!ptr->map)
+	{
+		ft_putendl_fd("ft_script: mmap failed", STDERR_FILENO);
 		return (FALSE);
+	}
 	ptr->sz = sz;
 	ptr->endptr = (void *)((t_uintptr)ptr->map + ptr->sz);
 	ptr->firstr = (t_rts_record *)ptr->map;
-	if (!ft_memfitsinbuff(NULL, ptr->firstr, sizeof(t_rts_record), ptr->endptr))
-	{
-		(void)munmap(ptr->map, sz);
-		return (FALSE);
-	}
 	return (TRUE);
 }
 
-static void					records_sleep(t_rts_record *r, t_rts_record *nr)
+static void			records_sleep(t_rts_record *r, t_rts_record *nr)
 {
 	struct timespec		rq;
 	t_uint32			udiff;
@@ -59,7 +62,7 @@ static void					records_sleep(t_rts_record *r, t_rts_record *nr)
 	(void)nanosleep(&rq, NULL);
 }
 
-inline static void			print_record_data(t_rts_record *r)
+inline static void	print_record_data(t_rts_record *r)
 {
 	const char	*data;
 
@@ -69,26 +72,12 @@ inline static void			print_record_data(t_rts_record *r)
 	(void)write(STDOUT_FILENO, data, r->size);
 }
 
-inline static t_rts_record	*next_record(t_rts *rts, \
-										t_rts_record *r, \
-										enum e_rts_direction not_dir)
-{
-	while (TRUE)
-	{
-		r = (t_rts_record *)((t_uintptr)r + sizeof(t_rts_record) + r->size);
-		if (!ft_memfitsinbuff(NULL, r, sizeof(t_rts_record), rts->endptr))
-			return (NULL);
-		if (not_dir == kDirectionAll || (char)r->direction != (char)not_dir)
-			break ;
-	}
-	return (r);
-}
-
-int							play_file(t_typescript *ts, t_opts *opts)
+int					play_file(t_typescript *ts, t_opts *opts)
 {
 	t_rts			rts;
 	t_rts_record	*r;
 	t_rts_record	*nr;
+	t_uint8			rc;
 
 	if (!map_file(&rts, ts))
 		return (EXIT_FAILURE);
@@ -101,12 +90,12 @@ int							play_file(t_typescript *ts, t_opts *opts)
 			print_record_data(r);
 		if (r->direction == kDirectionEnd && !(opts->switches & kSwitchQ))
 			announce_script_time(STDOUT_FILENO, (time_t)r->timestamp, NO, NO);
-		if (!(nr = next_record(&rts, r, kDirectionInput)))
+		if (!(rc = next_record(&nr, &rts, r, kDirectionInput)) || !nr)
 			break ;
 		if (!(opts->switches & kSwitchD) && nr->direction != kDirectionStart)
 			records_sleep(r, nr);
 		r = nr;
 	}
 	(void)munmap(rts.map, rts.sz);
-	return (EXIT_SUCCESS);
+	return (rc ? EXIT_SUCCESS : EXIT_FAILURE);
 }

@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/09 03:59:44 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 06:47:16 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 03:35:39 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,20 +50,20 @@ static t_uint8	script_write(t_pty *p, \
 	{
 		if ((rb = read(STDIN_FILENO, tsb, sizeof(tsb))) < 1)
 			return (FALSE);
-		(void)write(p->fdm, tsb, rb);
+		(void)write(p->fdm, tsb, (size_t)rb);
 		if (opts->switches & kSwitchR)
-			script_write_record(ts, tsb, rb, kDirectionInput);
+			script_write_record(ts, tsb, (size_t)rb, kDirectionInput);
 	}
 	if (FD_ISSET(p->fdm, setref))
 	{
 		if ((rb = read(p->fdm, tsb, sizeof(tsb))) < 1)
 			return (FALSE);
-		(void)write(STDOUT_FILENO, tsb, rb);
+		(void)write(STDOUT_FILENO, tsb, (size_t)rb);
 		if (opts->switches & kSwitchR)
-			script_write_record(ts, tsb, rb, kDirectionOutput);
+			script_write_record(ts, tsb, (size_t)rb, kDirectionOutput);
 		else
-			(opts->switches & kSwitchF) ? (void)write(ts->fd, tsb, rb) \
-										: ft_bwrite(ts->fd, tsb, rb, NO);
+			(opts->switches & kSwitchF) ? (void)write(ts->fd, tsb, (size_t)rb) \
+									: ft_bwrite(ts->fd, tsb, (size_t)rb, NO);
 	}
 	return (TRUE);
 }
@@ -71,11 +71,12 @@ static t_uint8	script_write(t_pty *p, \
 static void		script(t_pty *p, t_typescript *ts, t_cmd *cmd, t_opts *opts)
 {
 	fd_set	ss;
+	t_uint8	recorded;
 
-	if (opts->switches & kSwitchR)
+	if ((recorded = (opts->switches & kSwitchR) != 0))
 		script_write_record(ts, NULL, 0, kDirectionStart);
-	else if (!(opts->switches & kSwitchQ))
-		announce_script(ts, cmd, YES);
+	if (!(opts->switches & kSwitchQ))
+		announce_script(ts, cmd, YES, recorded);
 	while (TRUE)
 	{
 		FD_ZERO(&ss);
@@ -89,8 +90,8 @@ static void		script(t_pty *p, t_typescript *ts, t_cmd *cmd, t_opts *opts)
 		ft_bwrite(ts->fd, NULL, 0, YES);
 	if (opts->switches & kSwitchR)
 		script_write_record(ts, NULL, 0, kDirectionStart);
-	else if (!(opts->switches & kSwitchQ))
-		announce_script(ts, cmd, NO);
+	if (!(opts->switches & kSwitchQ))
+		announce_script(ts, cmd, NO, recorded);
 }
 
 static void		exec_process(t_cmd *cmd)
@@ -126,18 +127,12 @@ int				fork_process(t_pty *pty, \
 	int		status;
 
 	if ((pid = fork()) == -1)
-		ft_sfatal("fork() failed", 1);
+		sfatal("fork() failed", 1);
 	if (pid == 0)
 	{
 		pty_child_attach(pty);
 		exec_process(cmd);
-		ft_putstr("./ft_script: ");
-		if (cmd->path)
-		{
-			ft_putstr(cmd->path);
-			ft_putstr(": ");
-		}
-		ft_putendl("Could not exec");
+		ft_putendl("./ft_script: Could not exec");
 		_exit(15);
 	}
 	(void)close(pty->fds);

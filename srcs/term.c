@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:46:00 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 02:33:44 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/13 22:44:40 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ t_uint8		configure_inherited_tty(t_uint8 reset)
 	if (ft_tcgetattr(STDIN_FILENO, &itty_saved) != 0)
 		return (FALSE);
 	itty_new = itty_saved;
-	itty_new.c_lflag &= ~(ICANON | ECHO | ISIG);
+	itty_new.c_lflag &= (unsigned long)~(ICANON | ECHO | ISIG);
 	return (ft_tcsetattr(STDIN_FILENO, TCSANOW, &itty_new) == 0);
 }
 

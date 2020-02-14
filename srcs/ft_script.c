@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/12 02:13:05 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 03:21:21 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,16 +21,16 @@ static int		run_live(int ac, \
 						t_typescript *ts, \
 						t_opts *opts)
 {
-	t_pty			pty;
-	t_cmd			cmd;
-	int				exval;
+	t_pty				pty;
+	t_cmd				cmd;
+	int					exval;
 
 	if (!pty_new(&pty))
-		ft_sfatal("Could not create new pseudo-terminal", 1);
+		sfatal("Could not create new pseudo-terminal", 1);
 	if (!pty_slave_open(&pty))
-		ft_sfatal("Could not open slave portion of created pty", 1);
+		sfatal("Could not open slave portion of created pty", 1);
 	if (!configure_inherited_tty(NO))
-		ft_sfatal("Could not configure inherited tty", 1);
+		sfatal("Could not configure inherited tty", 1);
 	cmd_init(&cmd, (ac > 2) ? av + 2 : NULL);
 	exval = fork_process(&pty, &cmd, ts, opts);
 	(void)configure_inherited_tty(YES);
@@ -55,7 +55,7 @@ int				main(int ac, const char **av)
 		mode = O_WRONLY | O_CREAT \
 			| ((opts.switches & kSwitchA) ? O_APPEND : O_TRUNC);
 	if ((ts.fd = open(ts.path, mode, 0644)) < 0)
-		ft_sfatal("Could not open typescript file", 1);
+		sfatal("Could not open typescript file", 1);
 	if (opts.switches & kSwitchP)
 		exval = play_file(&ts, &opts);
 	else
