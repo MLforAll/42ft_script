@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/14 03:20:16 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 03:24:57 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 05:26:11 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include <sys/time.h>
 
 #include "ft_script.h"
+
+#if 0
 
 volatile sig_atomic_t	g_alarm_sigfd;
 
@@ -40,3 +42,5 @@ void					install_timer(t_typescript *ts, t_opts *opts)
 	timer.it_value = timer.it_interval;
 	(void)setitimer(ITIMER_REAL, &timer, NULL);
 }
+
+#endif

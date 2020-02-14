@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/09 03:59:44 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 03:35:39 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 05:43:59 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,26 +96,25 @@ static void		script(t_pty *p, t_typescript *ts, t_cmd *cmd, t_opts *opts)
 
 static void		exec_process(t_cmd *cmd)
 {
-	extern char	**environ;
-	void		*map;
-	size_t		sz;
-	size_t		idx;
+	extern char		**environ;
+	t_stkhp_buff	nav_buff;
+	char			**nav;
+	size_t			tmp;
 
 	if (!cmd->runenv)
 	{
 		(void)execve(cmd->path, cmd->args, environ);
 		return ;
 	}
-	sz = (ft_tablen(cmd->args) + 1) * sizeof(char *);
-	map = mmap(NULL, sz, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE, -1, 0);
-	if (!map)
+	tmp = (ft_tablen(cmd->args) + 1) * sizeof(char *);
+	if (!(nav = (char **)stkhp_buff_alloc(&nav_buff, tmp)))
 		return ;
-	*(char **)map = "/usr/bin/env";
-	idx = 0;
-	while (cmd->args[idx++])
-		((char **)map)[idx] = cmd->args[idx - 1];
-	((char **)map)[idx] = NULL;
-	(void)execve(*(char **)map, map, environ);
+	*nav = "/usr/bin/env";
+	tmp = 0;
+	while (cmd->args[tmp++])
+		nav[tmp] = cmd->args[tmp - 1];
+	nav[tmp] = NULL;
+	(void)execve(*nav, nav, environ);
 }
 
 int				fork_process(t_pty *pty, \

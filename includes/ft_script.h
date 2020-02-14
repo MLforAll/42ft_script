@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 03:34:01 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/14 05:36:59 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,6 +96,14 @@ typedef struct	s_rts
 	t_rts_record	*firstr;
 }				t_rts;
 
+typedef struct	s_stkhp_buff
+{
+	unsigned char	r_stk[512];
+	void			*r_map_ptr;
+	size_t			r_map_sz;
+	void			*ptr;
+}				t_stkhp_buff;
+
 /*
 ** Main
 */
@@ -167,9 +175,9 @@ int				ft_tcgetattr(int fd, struct termios *t);
 int				ft_tcsetattr(int fd, int opts, const struct termios *t);
 
 void			sfatal(const char *msg, int status) __attribute__((noreturn));
-void			ft_putstr_fds(const char *s, int fd1, int fd2);
-void			ft_putendl_fds(const char *s, int fd1, int fd2);
-void			ft_mwrites(int fd1, int fd2, const void *buff, size_t nbytes);
 void			ft_bwrite(int fd, const void *data, size_t nbytes, t_uint8 rst);
+
+void			*stkhp_buff_alloc(t_stkhp_buff *out, size_t sz);
+void			stkhp_buff_free(t_stkhp_buff *buff);
 
 #endif
