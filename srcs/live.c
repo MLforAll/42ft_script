@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/09 03:59:44 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 05:43:59 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/21 08:18:13 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,8 +82,17 @@ static void		script(t_pty *p, t_typescript *ts, t_cmd *cmd, t_opts *opts)
 		FD_ZERO(&ss);
 		FD_SET(p->fdm, &ss);
 		FD_SET(STDIN_FILENO, &ss);
-		if (select(p->fdm + 1, &ss, NULL, NULL, NULL) < 1 \
-			|| !script_write(p, ts, &ss, opts))
+		if (select(p->fdm + 1, &ss, NULL, NULL, NULL) < 1)
+		{
+			if (g_alarm_toggled)
+			{
+				ft_bwrite(ts->fd, NULL, 0, YES);
+				g_alarm_toggled = NO;
+				continue ;
+			}
+			break ;
+		}
+		if (!script_write(p, ts, &ss, opts))
 			break ;
 	}
 	if (!(opts->switches & kSwitchF))
@@ -135,6 +144,8 @@ int				fork_process(t_pty *pty, \
 		_exit(15);
 	}
 	(void)close(pty->fds);
+	if (opts->switches & kSwitchT)
+		install_timer(opts);
 	script(pty, ts, cmd, opts);
 	if (waitpid(pid, &status, 0) != pid)
 		status = EXIT_FAILURE;

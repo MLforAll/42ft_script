@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/06 05:19:16 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 02:39:58 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/21 08:22:00 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,13 +18,13 @@ static t_uint8	options_parse_getopt(int ac, const char **av, t_opts *ptr)
 	int			rc;
 	const char	*tmp;
 
-	ptr->switches = 0;
+	ptr->switches = (enum e_switches)0;
 	while ((rc = ft_getopt(ac, av, OPTSTRING)) != -1 && rc != '?')
 	{
 		if (rc == 't')
 		{
 			ptr->switches |= kSwitchT;
-			ptr->arg = g_optarg;
+			ptr->arg = ft_atoi(g_optarg);
 		}
 		else if ((tmp = ft_strchr(OPTSTRING, rc)))
 			ptr->switches |= (enum e_switches)(1 << (tmp - OPTSTRING));
@@ -38,7 +38,7 @@ t_uint8			options_parse(int ac, const char **av, t_opts *ptr)
 	int		rc;
 	int		idx;
 
-	ptr->arg = NULL;
+	ptr->arg = 0;
 	if (ft_strchr(OPTSTRING, ':'))
 		return (options_parse_getopt(ac, av, ptr));
 	idx = 1;

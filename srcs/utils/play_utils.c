@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/14 02:16:40 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 02:30:11 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/21 08:20:22 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ static t_uint8	check_direction(t_rts_record *r)
 	return (FALSE);
 }
 
-t_uint8			next_record(t_rts_record **out, \
+int				next_record(t_rts_record **out, \
 							t_rts *rts, \
 							t_rts_record *r, \
 							enum e_rts_direction not_dir)

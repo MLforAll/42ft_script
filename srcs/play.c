@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/09 02:54:55 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 02:17:14 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/21 08:20:59 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ static void			records_sleep(t_rts_record *r, t_rts_record *nr)
 	}
 	else
 	{
-		rq.tv_sec = nr->timestamp - r->timestamp;
+		rq.tv_sec = (long)(nr->timestamp - r->timestamp);
 		udiff = nr->utimestamp - r->utimestamp;
 	}
 	rq.tv_nsec = udiff * 1000;
@@ -77,7 +77,7 @@ int					play_file(t_typescript *ts, t_opts *opts)
 	t_rts			rts;
 	t_rts_record	*r;
 	t_rts_record	*nr;
-	t_uint8			rc;
+	int				rc;
 
 	if (!map_file(&rts, ts))
 		return (EXIT_FAILURE);

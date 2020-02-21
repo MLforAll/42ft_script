@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 05:36:59 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/21 08:21:51 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,23 @@
 
 # include <termios.h>
 # include <time.h>
+# include <signal.h>
 # include "libft.h"
 
 # define USE_LIBC_DIR		0
 # define PTSNAME_MAX_SIZE	128
 
 /*
+** Globals
+*/
+
+extern volatile sig_atomic_t	g_alarm_toggled;
+
+/*
 ** Args Parsing
 */
 
-# define OPTSTRING			"adFpqr"
+# define OPTSTRING			"adFpqrt:"
 
 enum			e_switches
 {
@@ -39,9 +46,10 @@ enum			e_switches
 
 typedef struct	s_opts
 {
-	const char	*arg;
-	int			switches;
-	int			ind;
+	enum e_switches	switches;
+	int				arg;
+	int				ind;
+	int				reserved;
 }				t_opts;
 
 /*
@@ -113,7 +121,7 @@ int				fork_process(t_pty *pty, \
 								t_typescript *ts, \
 								t_opts *opts);
 
-t_uint8			next_record(t_rts_record **out, \
+int				next_record(t_rts_record **out, \
 						t_rts *rts, \
 						t_rts_record *r, \
 						enum e_rts_direction not_dir);
@@ -163,7 +171,8 @@ void			pty_close(t_pty *p);
 ** Bonuses
 */
 
-void			install_timer(t_typescript *ts, t_opts *opts);
+void			install_timer(t_opts *opts);
+void			ft_signal(int sig, void (*handler)(int));
 
 /*
 ** Utils
