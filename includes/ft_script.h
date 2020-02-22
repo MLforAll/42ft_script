@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/21 08:21:51 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/22 17:42:18 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,25 +31,26 @@ extern volatile sig_atomic_t	g_alarm_toggled;
 ** Args Parsing
 */
 
-# define OPTSTRING			"adFpqrt:"
+# define OPTSTRING			"adFkpqrt:"
 
 enum			e_switches
 {
 	kSwitchA = 1 << 0,
 	kSwitchD = 1 << 1,
 	kSwitchF = 1 << 2,
-	kSwitchP = 1 << 3,
-	kSwitchQ = 1 << 4,
-	kSwitchR = 1 << 5,
-	kSwitchT = 1 << 6
+	kSwitchK = 1 << 3,
+	kSwitchP = 1 << 4,
+	kSwitchQ = 1 << 5,
+	kSwitchR = 1 << 6,
+	kSwitchT = 1 << 7
 };
 
 typedef struct	s_opts
 {
 	enum e_switches	switches;
-	int				arg;
+	int				flush_itv;
+	int				tsw_rst;
 	int				ind;
-	int				reserved;
 }				t_opts;
 
 /*
@@ -116,6 +117,8 @@ typedef struct	s_stkhp_buff
 ** Main
 */
 
+void			script(t_pty *p, t_typescript *ts, t_cmd *cmd, t_opts *opts);
+
 int				fork_process(t_pty *pty, \
 								t_cmd *cmd, \
 								t_typescript *ts, \
@@ -171,7 +174,7 @@ void			pty_close(t_pty *p);
 ** Bonuses
 */
 
-void			install_timer(t_opts *opts);
+void			install_timer(int itv);
 void			ft_signal(int sig, void (*handler)(int));
 
 /*
@@ -184,7 +187,7 @@ int				ft_tcgetattr(int fd, struct termios *t);
 int				ft_tcsetattr(int fd, int opts, const struct termios *t);
 
 void			sfatal(const char *msg, int status) __attribute__((noreturn));
-void			ft_bwrite(int fd, const void *data, size_t nbytes, t_uint8 rst);
+ssize_t			ft_bwrite(int fd, const void *data, size_t nbytes, t_uint8 rst);
 
 void			*stkhp_buff_alloc(t_stkhp_buff *out, size_t sz);
 void			stkhp_buff_free(t_stkhp_buff *buff);
