@@ -36,8 +36,7 @@ SRCFILES = ft_script.c \
 			timer.c \
 			utils/utils.c \
 			utils/play_utils.c \
-			utils/stkhp_buff.c \
-			utils/ft_getopt.c
+			utils/stkhp_buff.c
 SRCS = $(addprefix $(SRCDIR)/, $(SRCFILES))
 NSRC = $(shell echo "$(SRCFILES)" | awk '{print NF}')
 ifeq ($(shell [ ! -z "`which bc`" ] && [ ! -z "`which awk`" ] && echo true),true)

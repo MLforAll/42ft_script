@@ -6,12 +6,11 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/06 05:19:16 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/22 17:46:29 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/22 18:12:08 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "ft_script.h"
-#include "ft_getopt.h"
 
 static t_uint8	options_parse_getopt(int ac, const char **av, t_opts *ptr)
 {

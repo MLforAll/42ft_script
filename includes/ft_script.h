@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/22 17:42:18 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/22 18:11:57 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <termios.h>
 # include <time.h>
 # include <signal.h>
+
 # include "libft.h"
 
 # define USE_LIBC_DIR		0
