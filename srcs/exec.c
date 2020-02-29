@@ -6,14 +6,66 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/22 17:02:52 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/22 17:46:18 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/29 18:47:09 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <unistd.h>
 #include <stdlib.h>
+#include <sys/mman.h>
 
 #include "ft_script.h"
+
+#if 0
+
+/*
+** FORGIVEME: malloc() (or ft_malloc()) would have been nice
+*/
+
+static char		*sp_newenv(const char *name, const char *value)
+{
+	char	*map;
+	size_t	sz;
+	size_t	nsz;
+
+	nsz = ft_strlen(name);
+	sz = (nsz + ft_strlen(value) + 2) * sizeof(char);
+	map = (char *)mmap(NULL, sz, PROT_READ | PROT_WRITE, -1, \
+		MAP_ANON | MAP_PRIVATE, 0);
+	if (map)
+	{
+		(void)ft_strcpy(map, name);
+		map[nsz] = '=';
+		(void)ft_strcpy(map + nsz + 1, value);
+	}
+	return (map);
+}
+
+static t_uint8	sp_addenv(const char *name, const char *value)
+{
+	extern char			**environ;
+	size_t				len;
+	static t_stkhp_buff	rp;
+	t_stkhp_buff		np;
+	t_stkhp_buff		*pp;
+
+	pp = (rp.ptr) ? &np : &rp;
+	len = ft_tablen(environ);
+	if (!stkhp_buff_alloc(pp, (len + 2) * sizeof(char *)))
+		return (-1);
+	(void)ft_memcpy(pp->ptr, environ, len * sizeof(char *));
+	((char **)pp->ptr)[len++] = sp_newenv(name, value);
+	((char **)pp->ptr)[len] = NULL;
+	if (rp.ptr)
+	{
+		stkhp_buff_free(&rp);
+		(void)ft_memcpy(&rp, &np, sizeof(t_stkhp_buff));
+	}
+	environ = (char **)rp.ptr;
+	return (0);
+}
+
+#endif
 
 static void		exec_process(t_cmd *cmd)
 {
@@ -38,6 +90,10 @@ static void		exec_process(t_cmd *cmd)
 	(void)execve(*nav, nav, environ);
 }
 
+/*
+** (void)sp_addenv("SCRIPT", ts->path);
+*/
+
 int				fork_process(t_pty *pty, \
 								t_cmd *cmd, \
 								t_typescript *ts, \
@@ -60,6 +116,8 @@ int				fork_process(t_pty *pty, \
 	script(pty, ts, cmd, opts);
 	if (waitpid(pid, &status, 0) != pid)
 		status = EXIT_FAILURE;
+	if (WIFSIGNALED(status))
+		ft_putendl("SIGNALLED");
 	(void)close(pty->fdm);
 	return (WEXITSTATUS(status));
 }

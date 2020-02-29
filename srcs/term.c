@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:46:00 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/13 22:44:40 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/29 17:56:12 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,11 +27,6 @@ t_uint8		configure_inherited_tty(t_uint8 reset)
 	itty_new = itty_saved;
 	itty_new.c_lflag &= (unsigned long)~(ICANON | ECHO | ISIG);
 	return (ft_tcsetattr(STDIN_FILENO, TCSANOW, &itty_new) == 0);
-}
-
-inline int	ft_tcgetattr(int fd, struct termios *t)
-{
-	return (ioctl(fd, TIOCGETA, t));
 }
 
 inline int	ft_tcsetattr(int fd, int opts, const struct termios *t)

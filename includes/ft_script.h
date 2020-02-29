@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/04 05:09:08 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/22 18:11:57 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/29 18:12:52 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -161,6 +161,7 @@ void			cmd_init(t_cmd *ptr, const char **av);
 */
 
 t_uint8			configure_inherited_tty(t_uint8 reset);
+int				ft_tcsetattr(int fd, int opts, const struct termios *t);
 
 /*
 ** Pty
@@ -184,8 +185,6 @@ void			ft_signal(int sig, void (*handler)(int));
 
 int				ft_ptsname_r(int fd, char *buff, size_t max);
 char			*ft_ptsname(int fd);
-int				ft_tcgetattr(int fd, struct termios *t);
-int				ft_tcsetattr(int fd, int opts, const struct termios *t);
 
 void			sfatal(const char *msg, int status) __attribute__((noreturn));
 ssize_t			ft_bwrite(int fd, const void *data, size_t nbytes, t_uint8 rst);

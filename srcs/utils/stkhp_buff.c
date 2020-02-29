@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/14 05:28:57 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/14 05:38:20 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/29 18:13:49 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 void	*stkhp_buff_alloc(t_stkhp_buff *out, size_t sz)
 {
-	ft_bzero(out, sizeof(t_stkhp_buff));
+	ft_bzero(out->r_stk, sizeof(out->r_stk));
 	if (sz <= sizeof(out->r_stk))
 		return ((out->ptr = (void *)out->r_stk));
 	out->r_map_ptr = mmap(NULL, sz, PROT_READ | PROT_WRITE, -1, \
@@ -30,4 +30,7 @@ void	stkhp_buff_free(t_stkhp_buff *buff)
 {
 	if (buff->r_map_ptr)
 		(void)munmap(buff->r_map_ptr, buff->r_map_sz);
+	buff->r_map_ptr = NULL;
+	buff->r_map_sz = 0;
+	buff->ptr = NULL;
 }
