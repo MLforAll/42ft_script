@@ -6,7 +6,7 @@
 /*   By: kdumarai <kdumarai@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2020/02/22 17:02:52 by kdumarai          #+#    #+#             */
-/*   Updated: 2020/02/29 18:47:09 by kdumarai         ###   ########.fr       */
+/*   Updated: 2020/02/29 21:59:50 by kdumarai         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,6 @@
 #include <sys/mman.h>
 
 #include "ft_script.h"
-
-#if 0
 
 /*
 ** FORGIVEME: malloc() (or ft_malloc()) would have been nice
@@ -30,8 +28,8 @@ static char		*sp_newenv(const char *name, const char *value)
 
 	nsz = ft_strlen(name);
 	sz = (nsz + ft_strlen(value) + 2) * sizeof(char);
-	map = (char *)mmap(NULL, sz, PROT_READ | PROT_WRITE, -1, \
-		MAP_ANON | MAP_PRIVATE, 0);
+	map = (char *)mmap(NULL, sz, PROT_READ | PROT_WRITE,
+		MAP_ANON | MAP_PRIVATE, -1, 0);
 	if (map)
 	{
 		(void)ft_strcpy(map, name);
@@ -56,7 +54,7 @@ static t_uint8	sp_addenv(const char *name, const char *value)
 	(void)ft_memcpy(pp->ptr, environ, len * sizeof(char *));
 	((char **)pp->ptr)[len++] = sp_newenv(name, value);
 	((char **)pp->ptr)[len] = NULL;
-	if (rp.ptr)
+	if (pp == &np)
 	{
 		stkhp_buff_free(&rp);
 		(void)ft_memcpy(&rp, &np, sizeof(t_stkhp_buff));
@@ -65,7 +63,20 @@ static t_uint8	sp_addenv(const char *name, const char *value)
 	return (0);
 }
 
-#endif
+static int		waitandkill(pid_t pid)
+{
+	int		status;
+	pid_t	rc;
+
+	if ((rc = waitpid(pid, &status, WNOHANG)) == pid)
+		return (WEXITSTATUS(status));
+	else if (rc < 0)
+		return (EXIT_FAILURE);
+	(void)kill(pid, SIGKILL);
+	if (waitpid(pid, &status, WNOHANG) == pid)
+		return (WEXITSTATUS(status));
+	return (EXIT_FAILURE);
+}
 
 static void		exec_process(t_cmd *cmd)
 {
@@ -90,23 +101,20 @@ static void		exec_process(t_cmd *cmd)
 	(void)execve(*nav, nav, environ);
 }
 
-/*
-** (void)sp_addenv("SCRIPT", ts->path);
-*/
-
 int				fork_process(t_pty *pty, \
 								t_cmd *cmd, \
 								t_typescript *ts, \
 								t_opts *opts)
 {
 	pid_t	pid;
-	int		status;
+	int		rc;
 
 	if ((pid = fork()) == -1)
 		sfatal("fork() failed", 1);
 	if (pid == 0)
 	{
 		pty_child_attach(pty);
+		(void)sp_addenv("SCRIPT", ts->path);
 		exec_process(cmd);
 		ft_putendl("./ft_script: Could not exec");
 		_exit(15);
@@ -114,10 +122,7 @@ int				fork_process(t_pty *pty, \
 	(void)close(pty->fds);
 	install_timer(opts->flush_itv);
 	script(pty, ts, cmd, opts);
-	if (waitpid(pid, &status, 0) != pid)
-		status = EXIT_FAILURE;
-	if (WIFSIGNALED(status))
-		ft_putendl("SIGNALLED");
+	rc = waitandkill(pid);
 	(void)close(pty->fdm);
-	return (WEXITSTATUS(status));
+	return (rc);
 }
